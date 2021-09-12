@@ -1,4 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Reseller, resellerDocument } from './Schemas/reseller.schema';
@@ -9,6 +14,8 @@ export class ResellersService {
     @InjectModel(Reseller.name) private resellerModel: Model<resellerDocument>,
   ) {}
 
+  private readonly logger = new Logger(ResellersService.name);
+
   async getAll(): Promise<Reseller[]> {
     return this.resellerModel.find().exec();
   }
@@ -18,7 +25,14 @@ export class ResellersService {
       const newReseller = new this.resellerModel(reseller);
       return newReseller.save();
     } catch (error) {
-      console.log({ error });
+      if (['message', 'status'].every((item) => item in error)) {
+        this.logger.error(
+          `Erro durante ${ResellersService.name}.create(). Erro: ${error.message}`,
+        );
+        throw new HttpException(error.message, error.status);
+      } else {
+        throw new InternalServerErrorException();
+      }
     }
   }
 }
