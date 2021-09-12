@@ -12,4 +12,13 @@ export class ResellersService {
   async getAll(): Promise<Reseller[]> {
     return this.resellerModel.find().exec();
   }
+
+  async create(reseller: Reseller): Promise<Reseller> {
+    try {
+      const newReseller = new this.resellerModel(reseller);
+      return newReseller.save();
+    } catch (error) {
+      console.log({ error });
+    }
+  }
 }
