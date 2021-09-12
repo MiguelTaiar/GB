@@ -12,6 +12,6 @@ export class AuthController {
   @Post('/login')
   async login(@Request() req) {
     this.logger.log(`Iniciando chamada para ${AuthController.name}/login`);
-    return req.user;
+    return this.authService.login(req.user);
   }
 }

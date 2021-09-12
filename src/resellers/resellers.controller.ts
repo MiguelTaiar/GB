@@ -6,9 +6,11 @@ import {
   Logger,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { ResellersService } from './resellers.service';
 import { Reseller } from './Schemas/reseller.schema';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @Controller('resellers')
 export class ResellersController {
@@ -16,17 +18,20 @@ export class ResellersController {
 
   private readonly logger = new Logger(ResellersController.name);
 
+  @UseGuards(JwtAuthGuard)
   @Get()
   getAll(): Promise<Reseller[]> {
     return this.resellersService.getAll();
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get()
   async getByEmail(@Query() email: string): Promise<Reseller> {
     this.logger.log(`Iniciando chamada para getByEmail para email: ${email}`);
     return this.resellersService.getByEmail(email);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post()
   async registerReseller(@Body() reseller: Reseller): Promise<Reseller> {
     this.logger.log(`Iniciando chamada para registerReseller`);

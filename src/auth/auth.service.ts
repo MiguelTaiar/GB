@@ -1,10 +1,14 @@
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { ResellersService } from 'src/resellers/resellers.service';
+import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
-  constructor(private resellersService: ResellersService) {}
+  constructor(
+    private resellersService: ResellersService,
+    private jwtService: JwtService,
+  ) {}
 
   private readonly logger = new Logger(AuthService.name);
 
@@ -32,5 +36,13 @@ export class AuthService {
     } catch (err) {
       this.logger.error(err);
     }
+  }
+
+  async login(user: any) {
+    const payload = { email: user.email, sub: user._id.toString() };
+    return {
+      expires_in: '1h',
+      access_token: this.jwtService.sign(payload),
+    };
   }
 }
