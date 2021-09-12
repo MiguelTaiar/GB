@@ -1,18 +1,17 @@
-import { Body, Controller, Post } from '@nestjs/common';
-import { Reseller } from 'src/resellers/Schemas/reseller.schema';
+import { Controller, Logger, Post, UseGuards, Request } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { LocalAuthGuard } from './local-auth.guard';
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  @Post('/encryptData')
-  encryptResellerData(@Body() data: Reseller): Reseller {
-    return this.authService.encryptData(data);
-  }
+  private readonly logger = new Logger(AuthController.name);
 
-  @Post('/decryptData')
-  decryptResellerData(@Body() data: Reseller): Reseller {
-    return this.authService.decryptData(data);
+  @UseGuards(LocalAuthGuard)
+  @Post('/login')
+  async login(@Request() req) {
+    this.logger.log(`Iniciando chamada para ${AuthController.name}/login`);
+    return req.user;
   }
 }

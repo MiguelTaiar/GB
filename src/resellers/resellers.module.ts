@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ResellersController } from './resellers.controller';
+import { ResellersRepository } from './resellers.repository';
 import { ResellersService } from './resellers.service';
 import { Reseller, resellerSchema } from './Schemas/reseller.schema';
 
@@ -11,7 +12,7 @@ import { Reseller, resellerSchema } from './Schemas/reseller.schema';
     ]),
   ],
   controllers: [ResellersController],
-  providers: [ResellersService],
+  providers: [ResellersService, ResellersRepository],
   exports: [ResellersService],
 })
 export class ResellersModule {}

@@ -5,6 +5,7 @@ import {
   HttpException,
   Logger,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ResellersService } from './resellers.service';
 import { Reseller } from './Schemas/reseller.schema';
@@ -20,6 +21,12 @@ export class ResellersController {
     return this.resellersService.getAll();
   }
 
+  @Get()
+  async getByEmail(@Query() email: string): Promise<Reseller> {
+    this.logger.log(`Iniciando chamada para getByEmail para email: ${email}`);
+    return this.resellersService.getByEmail(email);
+  }
+
   @Post()
   async registerReseller(@Body() reseller: Reseller): Promise<Reseller> {
     this.logger.log(`Iniciando chamada para registerReseller`);
@@ -30,5 +37,10 @@ export class ResellersController {
         throw new HttpException(error['_message'], 400);
       }
     }
+  }
+
+  @Post('/encryptData')
+  async encryptResellerData(@Body() data: Reseller): Promise<Reseller> {
+    return this.resellersService.encryptReseller(data);
   }
 }
