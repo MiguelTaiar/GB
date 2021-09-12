@@ -12,5 +12,6 @@ import { Reseller, resellerSchema } from './Schemas/reseller.schema';
   ],
   controllers: [ResellersController],
   providers: [ResellersService],
+  exports: [ResellersService],
 })
 export class ResellersModule {}

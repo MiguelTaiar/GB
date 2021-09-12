@@ -1,5 +1,4 @@
 import {
-  HttpException,
   Injectable,
   InternalServerErrorException,
   Logger,
@@ -20,19 +19,17 @@ export class ResellersService {
     return this.resellerModel.find().exec();
   }
 
+  async getByEmail(email: string): Promise<Reseller> {
+    return this.resellerModel.findOne({ email });
+  }
+
   async create(reseller: Reseller): Promise<Reseller> {
+    this.logger.log(`Salvando revendedor no Banco de Dados`);
     try {
       const newReseller = new this.resellerModel(reseller);
       return newReseller.save();
     } catch (error) {
-      if (['message', 'status'].every((item) => item in error)) {
-        this.logger.error(
-          `Erro durante ${ResellersService.name}.create(). Erro: ${error.message}`,
-        );
-        throw new HttpException(error.message, error.status);
-      } else {
-        throw new InternalServerErrorException();
-      }
+      throw new InternalServerErrorException();
     }
   }
 }
