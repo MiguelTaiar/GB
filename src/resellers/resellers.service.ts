@@ -2,7 +2,6 @@ import {
   Injectable,
   InternalServerErrorException,
   Logger,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -25,14 +24,7 @@ export class ResellersService {
   async getByEmail(email: string): Promise<Reseller> {
     this.logger.log(`Validando user ${email} no banco de dados`);
     const users = await this.getAll();
-    const matchedUser = users.filter(
-      (user) => this.resellersRepository.decryptData(user.email) === email,
-    );
-    if (matchedUser && matchedUser.length) {
-      return matchedUser[0];
-    } else {
-      throw new UnauthorizedException();
-    }
+    return this.resellersRepository.findUser(users, email, 'email');
   }
 
   async create(reseller: Reseller): Promise<Reseller> {

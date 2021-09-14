@@ -31,8 +31,8 @@ export class ResellersController {
     return this.resellersService.getByEmail(email);
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Post()
+  // @UseGuards(JwtAuthGuard)
+  @Post('/register')
   async registerReseller(@Body() reseller: Reseller): Promise<Reseller> {
     this.logger.log(`Iniciando chamada para registerReseller`);
     try {

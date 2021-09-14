@@ -2,6 +2,7 @@ import {
   InternalServerErrorException,
   Injectable,
   Logger,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Reseller } from './Schemas/reseller.schema';
 import * as CryptoJS from 'crypto-js';
@@ -38,5 +39,16 @@ export class ResellersRepository {
   decryptData(data: string): string {
     const bytes = CryptoJS.AES.decrypt(data, process.env.CRYPTO_KEY);
     return bytes.toString(CryptoJS.enc.Utf8);
+  }
+
+  findUser(users: Array<Reseller>, data: string, dataType: string): Reseller {
+    const matchedUser = users.filter(
+      (user) => this.decryptData(user[dataType]) === data,
+    );
+    if (matchedUser && matchedUser.length) {
+      return matchedUser[0];
+    } else {
+      throw new UnauthorizedException();
+    }
   }
 }
