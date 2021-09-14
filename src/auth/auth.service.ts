@@ -30,9 +30,7 @@ export class AuthService {
   async checkPassword(pass: string, hash: string): Promise<boolean> {
     this.logger.log(`Comparando: ${pass} com ${hash}`);
     try {
-      const match = await bcrypt.compare(pass, hash);
-      console.log({ match });
-      return match;
+      return await bcrypt.compare(pass, hash);
     } catch (err) {
       this.logger.error(err);
     }
