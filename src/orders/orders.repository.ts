@@ -1,6 +1,10 @@
+import { HttpService } from '@nestjs/axios';
 import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { AxiosResponse } from 'axios';
 import { Model } from 'mongoose';
+import { map, Observable } from 'rxjs';
+import { ResellersService } from 'src/resellers/resellers.service';
 import { OrderRequest } from './interfaces/order.interface';
 import { Order, orderDocument } from './Schemas/order.schema';
 
@@ -8,9 +12,21 @@ import { Order, orderDocument } from './Schemas/order.schema';
 export class OrdersRepository {
   constructor(
     @InjectModel(Order.name) private orderModel: Model<orderDocument>,
+    private httpService: HttpService,
+    private resellersService: ResellersService,
   ) {}
 
   private readonly logger = new Logger(OrdersRepository.name);
+
+  async checkIfCpfExists(cpf: string): Promise<boolean> {
+    try {
+      const user = await this.resellersService.getByCpf(cpf);
+      return user ? true : false;
+    } catch (error) {
+      this.logger.error(`Erro: ${error}`);
+      return false;
+    }
+  }
 
   normalizeDataTypes(order: OrderRequest) {
     this.logger.log(`Normalizando dados para compra ${order.code}`);
@@ -46,9 +62,6 @@ export class OrdersRepository {
     );
 
     const userOrders = await this.getOrders('cpf', orderRequest.cpf);
-    // const userOrders = await this.orderModel
-    //   .find({ cpf: orderRequest.cpf })
-    //   .exec();
 
     const sameMonthOrders = this.getSameMonthOrders(
       userOrders,
@@ -98,5 +111,26 @@ export class OrdersRepository {
 
   checkOrderStatus(cpf: string): string {
     return cpf === '153.509.460-56' ? 'Aprovado' : 'Em validação';
+  }
+
+  formatCpf(cpf: string): string {
+    return cpf.replace(/\.|\-/g, '');
+  }
+
+  async requestCashbackByCpf(cpf: string): Promise<Observable<AxiosResponse>> {
+    try {
+      const { CASHBACK_API_URI } = process.env;
+      const { CASHBACK_API_TOKEN } = process.env;
+      this.logger.log(`Chamando api: ${CASHBACK_API_URI}`);
+
+      return this.httpService
+        .get(CASHBACK_API_URI, {
+          headers: { token: CASHBACK_API_TOKEN },
+          params: { cpf: cpf },
+        })
+        .pipe(map((res) => res.data));
+    } catch (error) {
+      this.logger.error(`Erro: ${error}`);
+    }
   }
 }

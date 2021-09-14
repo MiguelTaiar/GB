@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, HttpException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { OrdersRepository } from './orders.repository';
@@ -16,6 +16,11 @@ export class OrdersService {
 
   async processOrder(order: OrderRequest): Promise<Order> {
     this.logger.log(`Construindo dados para compra ${order.code}`);
+
+    if (!(await this.ordersRepository.checkIfCpfExists(order.cpf))) {
+      throw new HttpException(`Unauthorized: cpf nao cadastrado`, 401);
+    }
+
     const normalizedOrder = this.ordersRepository.normalizeDataTypes(order);
 
     const cashbackPercent =
@@ -36,6 +41,15 @@ export class OrdersService {
   }
 
   async getOrderByCpf(cpf: string): Promise<Array<Order>> {
+    this.logger.log(`Coletando pedidos para cpf: ${cpf}`);
     return this.ordersRepository.getOrders('cpf', cpf);
+  }
+
+  async getCashbackAmount(cpf: string) {
+    this.logger.log(`Formatando cpf: ${cpf}`);
+    const cpfFormated = this.ordersRepository.formatCpf(cpf);
+
+    this.logger.log(`Fazendo solicatacao para API`);
+    return this.ordersRepository.requestCashbackByCpf(cpfFormated);
   }
 }

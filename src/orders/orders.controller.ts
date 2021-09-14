@@ -18,7 +18,7 @@ export class OrdersController {
 
   private readonly logger = new Logger(OrdersController.name);
 
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Post('/addOrder')
   async addOrder(@Body() order: OrderRequest): Promise<Order> {
     this.logger.log(`Iniciando chamada para addOrder`);
@@ -26,9 +26,20 @@ export class OrdersController {
     return this.ordersService.processOrder(order);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get('/getOrders/:cpf')
   async getOrders(@Param('cpf') cpf: string): Promise<Array<Order>> {
     this.logger.log(`Iniciando chamada para getOrders para cpf: ${cpf}`);
+
     return this.ordersService.getOrderByCpf(cpf);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/getCashbackAmount/:cpf')
+  async getCashbackAmount(@Param('cpf') cpf: string): Promise<any> {
+    this.logger.log(
+      `Iniciando chamada para getCashbackAmount para cpf: ${cpf}`,
+    );
+    return this.ordersService.getCashbackAmount(cpf);
   }
 }

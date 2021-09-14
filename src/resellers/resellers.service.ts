@@ -27,6 +27,12 @@ export class ResellersService {
     return this.resellersRepository.findUser(users, email, 'email');
   }
 
+  async getByCpf(cpf: string): Promise<Reseller> {
+    this.logger.log(`Validando user ${cpf} no banco de dados`);
+    const users = await this.getAll();
+    return this.resellersRepository.findUser(users, cpf, 'cpf');
+  }
+
   async create(reseller: Reseller): Promise<Reseller> {
     this.logger.log(`Salvando revendedor no Banco de Dados`);
     try {
